@@ -2,7 +2,11 @@ import React, { useState, useEffect } from "react";
 import { Outlet, Link, useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import avatar from "../assets/default.png";
+import loading from "../assets/loading.gif";
 import axios from "./Api";
+import "./firebase.js";
+import storage from "./firebase";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 
 const Auth = (props) => {
 	const [title, setTitle] = useState("");
@@ -11,8 +15,11 @@ const Auth = (props) => {
 	const [uname, setUname] = useState("");
 	const [mail, setMail] = useState("");
 	const [pass, setPass] = useState("");
+	const [url, setUrl] = useState("");
 	const [image, setImage] = useState(avatar);
+	const [percent, setPercent] = useState(0);
 	const navigate = useNavigate();
+
 	useEffect(() => {
 		const loggedInUser = localStorage.getItem("user");
 		if (loggedInUser) {
@@ -21,17 +28,14 @@ const Auth = (props) => {
 		}
 	}, []);
 
-	const readImage = (e) => {
-		if (e.target.files && e.target.files[0]) {
-			const name = e.target.files[0].name;
+	const readImage = (file) => {
+		if (file.target.files && file.target.files[0]) {
 			var reader = new FileReader();
-
-			console.log(e.target.files[0]);
 			reader.onload = function (e) {
 				setImage(e.target.result);
+				setPercent(file.target.files[0]);
 			};
-
-			reader.readAsDataURL(e.target.files[0]);
+			reader.readAsDataURL(file.target.files[0]);
 		}
 	};
 
@@ -49,17 +53,80 @@ const Auth = (props) => {
 			para.classList.add("text-center", "font-bold", "text-2xl");
 			para.appendChild(node);
 			parent.appendChild(para);
+			navigate("/");
 		}
 	};
 
+	const uploadImage = async () => {
+		const storageRef = ref(storage, `${uname}`);
+		const uploadTask = uploadBytesResumable(storageRef, percent);
+		setPercent(0);
+		console.log("Uploading  !!!!");
+
+		uploadTask.on(
+			"state_changed",
+			async (s) => {
+				const percent = Math.round(
+					(s.bytesTransferred / s.totalBytes) * 100
+				);
+
+				// update progress
+				setPercent(percent);
+			},
+			(err) => console.log(err),
+			async () => {
+				// download url
+				await getDownloadURL(uploadTask.s.ref).then((url) => {
+					setUrl(url);
+					console.log("Firebase:-- ", url);
+				});
+			}
+		);
+		return;
+	};
+
+	async function uploadTaskPromise() {
+		return new Promise(function (resolve, reject) {
+			const storageRef = ref(storage, `${uname}`);
+			const uploadTask = uploadBytesResumable(storageRef, percent);
+			setPercent(0);
+
+			uploadTask.on(
+				"state_changed",
+				function (snapshot) {
+					var progress =
+						(snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+					setPercent(progress);
+				},
+				function error(err) {
+					console.log("error", err);
+					reject();
+				},
+				function complete() {
+					getDownloadURL(uploadTask.snapshot.ref).then(function (
+						downloadURL
+					) {
+						setUrl(downloadURL);
+						console.log(downloadURL);
+						resolve(downloadURL);
+					});
+				}
+			);
+		});
+	}
+
 	const submitForm = async (e) => {
 		e.preventDefault();
+
+		// await uploadImage();
+		await uploadTaskPromise();
+		console.log("Uploaded  !!!!");
 
 		const user = {
 			uname: uname,
 			mail: mail,
 			pass: pass,
-			img: image,
+			img: url,
 		};
 
 		await axios.get("/data").then((res) => checkToPost(res.data, user));
@@ -97,7 +164,7 @@ const Auth = (props) => {
 			<section className="flex justify-center items-center h-[80vh]">
 				<div className="bg-white-900 rounded-xl p-6 myForm drop-shadow-2xl pb-10 dark:drop-shadow-dark-2xl">
 					<form
-						className="space-y-7"
+						className="space-y-8"
 						action=""
 						onSubmit={flag ? logIn : submitForm}
 					>
@@ -115,7 +182,7 @@ const Auth = (props) => {
 							)}
 						</div>
 						<div className="w-full flex flex-column">
-							<div className="space-y-7 max-w-sm">
+							<div className="space-y-8 max-w-sm">
 								{!flag && (
 									<input
 										className="w-full p-4 text-sm border border-silver rounded"
@@ -149,7 +216,7 @@ const Auth = (props) => {
 											id="check"
 											required
 										/>{" "}
-										<label for="check">
+										<label htmlFor="check">
 											I agree to the terms and conditions
 											and the privacy policy
 										</label>
@@ -157,9 +224,9 @@ const Auth = (props) => {
 								)}
 							</div>
 							{!flag && (
-								<div className="file-input ml-5">
+								<div className="file-input ml-5 text-center">
 									<img
-										className="uploadedImage border border-silver rounded-[50%]"
+										className="uploadedImage drop-shadow-2xl border border-silver rounded-[50%]"
 										src={image}
 										alt=""
 									/>
@@ -169,12 +236,27 @@ const Auth = (props) => {
 											name="file-input"
 											id="file-input"
 											className="finput"
+											accept="image/*"
+											max-file-size="1024"
 											onChange={(e) => readImage(e)}
 										/>
-										<br />
+										{0 < percent && percent < 100 ? (
+											<p>
+												<img
+													className="inline"
+													src={loading}
+													alt=""
+													width={20}
+												/>
+												{"  "}
+												Uploading....{percent}%
+											</p>
+										) : (
+											<br />
+										)}
 										<label
 											className="flabel"
-											for="file-input"
+											htmlFor="file-input"
 										>
 											<svg
 												aria-hidden="true"

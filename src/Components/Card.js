@@ -5,7 +5,7 @@ const Card = (props) => {
 		<div
 			href="#"
 			className={`flex items-center rounded-lg border-r-4 border-metal flex-row max-w-xl shadow-xl bg-white-900 ${
-				!props.uname && (props.choice % 2 ? "self-end" : "self-start")
+				props.choice % 2 ? "self-end" : "self-start"
 			}`}
 		>
 			<img
@@ -15,10 +15,10 @@ const Card = (props) => {
 			/>
 			<div className="flex flex-col justify-between p-10 drop-shadow-2xl text-center">
 				<h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 drop-shadow-2xl">
-					{props.uname ? `Username: ${props.uname}` : props.title}
+					{props.title}
 				</h5>
 				<p className="mb-3 font-normal text-gray-700  ">
-					{props.umail ? `Mail: ${props.umail}` : props.content}
+					{props.content}
 				</p>
 			</div>
 		</div>

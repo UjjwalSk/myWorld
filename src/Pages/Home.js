@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import data from "../Components/cardContent";
+import axios from "../Components/Api";
 import Card from "../Components/Card";
 import map from "../assets/map.svg";
 import ReactVivus from "react-vivus";
@@ -14,6 +15,15 @@ const Home = () => {
 		document.getElementById("g2").style.fill = "#40e137";
 		document.getElementById("bl").style.fill = "#902bf5";
 	}, 2000);
+	const [data, setData] = useState("");
+	useEffect(() => {
+		axios.get("/data").then((r) => {
+			r = r.data.splice(1);
+			r = r.map((e) => [...e.blogs]);
+			setData(r.flat());
+			console.log(r.data);
+		});
+	}, []);
 
 	return (
 		<>
@@ -47,15 +57,16 @@ const Home = () => {
 						/>
 					</div>
 				</div>
-				{data.map((e) => (
-					<Card
-						key={e.key}
-						title={e.title}
-						content={e.content}
-						choice={e.key}
-						style={{ zIndex: 2 }}
-					/>
-				))}
+				{data &&
+					data.map((e, i) => (
+						<Card
+							key={i}
+							title={e.title}
+							content={e.content}
+							choice={i}
+							style={{ zIndex: 2 }}
+						/>
+					))}
 			</div>
 			<img
 				src={map}

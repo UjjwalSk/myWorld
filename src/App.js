@@ -9,6 +9,7 @@ import Footer from "./Components/Footer";
 import Auth from "./Components/Auth";
 import User from "./Components/User";
 import Edit from "./Components/Edit";
+import Editor from "./Components/Editor";
 import "./App.css";
 
 export default function App() {
@@ -44,6 +45,10 @@ export default function App() {
 								<Route
 									path="/user/admin/edit/:id"
 									element={<Edit />}
+								/>
+								<Route
+									path="/editor/:use/:uid"
+									element={<Editor />}
 								/>
 							</>
 						)}
