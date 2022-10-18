@@ -51,7 +51,8 @@ const CrudTable = (props) => {
 											<Link
 												to={
 													props.myPath
-														? props.myPath
+														? props.myPath +
+														  `/${i - 1}`
 														: `${props.path}/edit/${i}`
 												}
 											>

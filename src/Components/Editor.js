@@ -1,28 +1,41 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ReactQuill from "react-quill";
 import { useParams, useNavigate } from "react-router-dom";
 import "react-quill/dist/quill.snow.css";
 import axios from "./Api";
 
-const Editor = (props) => {
-	const { use, uid } = useParams();
+const Editor = () => {
+	const { use, uid, blogID } = useParams();
 	const [data, setData] = useState("");
+	const [title, setTitle] = useState("");
+	const [uname, setUname] = useState("");
 	const navigate = useNavigate();
+
+	useEffect(() => {
+		axios.get(`/data/${uid}`).then((r) => {
+			setUname(r.data.uname);
+			if (use == 1) {
+				r = r.data.blogs[blogID];
+				setTitle(r.title);
+				setData(r.content);
+			}
+		});
+	}, []);
+
 	const submit = async (e) => {
 		e.preventDefault();
-		console.log("asdjaopdjasopjdo");
-		if (use == 0) {
-			await axios.get(`/data/${uid}`).then((r) => {
-				r = r.data;
-				r.blogs.push(data);
-			});
-		}
-		// await axios.put(`/data/${id}`, {
-		// 	uname: data.uname,
-		// 	mail: data.mail,
-		// 	pass: data.pass,
-		// });
-		// navigate("/user/admin");
+		await axios.get(`/data/${uid}`).then(async (r) => {
+			r = r.data;
+			const obj = {
+				title: title,
+				content: data,
+				date: new Date().toLocaleDateString(),
+				author: r.uname,
+			};
+			use == 0 ? r.blogs.push(obj) : (r.blogs[blogID] = obj);
+			await axios.put(`/data/${r.id}`, r);
+			navigate(`/user/${r.uname}`);
+		});
 	};
 	return (
 		<div className="mx-3 text-center">
@@ -34,12 +47,23 @@ const Editor = (props) => {
 			</button>
 			<button
 				className="w-4/12 py-3 mx-2 bg-red text-white-900 hover:bg-midnight rounded text-sm font-bold"
-				onClick={() => console.log("apple")}
+				onClick={() => navigate(`/user/${uname}`)}
 			>
+				{console.log(uname)}
 				Cancel
 			</button>
+			<input
+				className="block w-7/12 p-4 m-5 text-lg font-bold border border-silver rounded"
+				type="text"
+				placeholder="Title"
+				value={title}
+				required
+				onChange={(e) => {
+					setTitle(e.target.value);
+				}}
+			/>
 			<ReactQuill
-				className="m-5"
+				className="m-5 dark:bg-white-900 dark:text-black"
 				theme="snow"
 				onChange={(e) => setData(e)}
 				value={data}
@@ -58,7 +82,6 @@ const Editor = (props) => {
 						["clean"],
 					],
 					clipboard: {
-						// toggle to add extra line breaks when pasting HTML:
 						matchVisual: false,
 					},
 				}}

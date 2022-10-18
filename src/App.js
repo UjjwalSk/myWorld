@@ -10,16 +10,17 @@ import Auth from "./Components/Auth";
 import User from "./Components/User";
 import Edit from "./Components/Edit";
 import Editor from "./Components/Editor";
+import Blog from "./Components/Blog";
 import "./App.css";
 
 export default function App() {
 	const [isLoggedIn, setLoggedIn] = useState(
 		Boolean(localStorage.getItem("user"))
 	);
-	console.log(isLoggedIn);
 	const change = () => {
 		setLoggedIn(!isLoggedIn);
 	};
+
 	return (
 		<>
 			<BrowserRouter>
@@ -47,9 +48,10 @@ export default function App() {
 									element={<Edit />}
 								/>
 								<Route
-									path="/editor/:use/:uid"
+									path="/editor/:use/:uid/:blogID"
 									element={<Editor />}
 								/>
+								<Route path="/blog" element={<Blog />} 	/>
 							</>
 						)}
 						<Route path="*" element={<NoPage />} />

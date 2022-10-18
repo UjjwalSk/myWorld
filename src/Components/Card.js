@@ -1,10 +1,11 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 const Card = (props) => {
 	return (
 		<div
 			href="#"
-			className={`flex items-center rounded-lg border-r-4 border-metal flex-row max-w-xl shadow-xl bg-white-900 ${
+			className={`flex items-center rounded-lg border-r-4 border-metal h-max-[126px] flex-row max-w-xl overflow-hidden shadow-xl bg-white-900 ${
 				props.choice % 2 ? "self-end" : "self-start"
 			}`}
 		>
@@ -14,12 +15,22 @@ const Card = (props) => {
 				alt=""
 			/>
 			<div className="flex flex-col justify-between p-10 drop-shadow-2xl text-center">
-				<h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 drop-shadow-2xl">
-					{props.title}
-				</h5>
-				<p className="mb-3 font-normal text-gray-700  ">
-					{props.content}
-				</p>
+				<Link to="/blog" state={{ data: props.raw }}>
+					<h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 drop-shadow-2xl hover:text-metal hover:cursor-pointer">
+						{props.title}
+					</h5>
+				</Link>
+				<p
+					className="mb-3 font-normal text-gray-700"
+					dangerouslySetInnerHTML={{
+						__html:
+							props.content.length < 200
+								? props.content
+										.split(" ")
+										.splice(0, 15)
+										.join(" "):"" + "....",
+					}}
+				></p>
 			</div>
 		</div>
 	);

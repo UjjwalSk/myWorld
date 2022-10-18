@@ -17,7 +17,7 @@ module.exports = {
 			violet: { 100: "#5f43b2", 900: "#902bf5" },
 			midnight: "#13193a",
 			metal: "#4261f1",
-			tahiti: "#3ab7bf",
+			tahiti: "#3ab7bf",	
 			silver: "#c7c7d0",
 			bermuda: "#78dcca",
 			black: "#000",

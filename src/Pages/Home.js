@@ -19,9 +19,8 @@ const Home = () => {
 	useEffect(() => {
 		axios.get("/data").then((r) => {
 			r = r.data.splice(1);
-			r = r.map((e) => [...e.blogs]);
-			setData(r.flat());
-			console.log(r.data);
+			r = r.map((e) => e.blogs.map((f) => [f, e.img])).flat();
+			setData(r);
 		});
 	}, []);
 
@@ -57,16 +56,31 @@ const Home = () => {
 						/>
 					</div>
 				</div>
-				{data &&
-					data.map((e, i) => (
-						<Card
-							key={i}
-							title={e.title}
-							content={e.content}
-							choice={i}
-							style={{ zIndex: 2 }}
-						/>
-					))}
+				{
+					data &&
+						data.map((e, i) => {
+							if (e)
+								return (
+									<Card
+										key={i}
+										title={e[0].title}
+										content={e[0].content}
+										choice={i}
+										style={{ zIndex: 2 }}
+										raw={{ ...e }}
+									/>
+								);
+						})
+					// data.map((e, i) => (
+					// <Card
+					// 	key={i}
+					// 	title={e.title}
+					// 	content={e.content}
+					// 	choice={i}
+					// 	style={{ zIndex: 2 }}
+					// />
+					// ))
+				}
 			</div>
 			<img
 				src={map}

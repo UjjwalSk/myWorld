@@ -23,6 +23,7 @@ const Edit = (props) => {
 		});
 		navigate("/user/admin");
 	};
+
 	return (
 		<div className="flex justify-center m-24">
 			<div

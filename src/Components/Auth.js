@@ -60,6 +60,7 @@ const Auth = (props) => {
 			mail: mail,
 			pass: pass,
 			img: image,
+			blogs: [],
 		};
 
 		await axios.get("/data").then((res) => checkToPost(res.data, user));

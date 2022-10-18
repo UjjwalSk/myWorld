@@ -9,7 +9,7 @@ import { Link } from "react-router-dom";
 const User = () => {
 	const { uname } = useParams();
 	const [cred, setCred] = useState("");
-
+	const [data, setData] = useState("");
 	const navigate = useNavigate();
 
 	useEffect(() => {
@@ -21,6 +21,17 @@ const User = () => {
 		});
 	}, []);
 
+	useEffect(
+		(e) => {
+			if (cred.blogs) {
+				let temp = cred.blogs.map((e) => [e.title, e.date]);
+				temp.unshift(1);
+				setData(temp);
+			}
+		},
+		[cred]
+	);
+
 	const filter = async (e) => {
 		await axios.get(`/data?uname=${uname}`).then((r) => {
 			let key = e.target.value.toLowerCase();
@@ -31,8 +42,17 @@ const User = () => {
 		});
 	};
 
+	const deleteData = async (i) => {
+		cred && cred.blogs.splice(i - 1, 1);
+		await axios.put(`/data/${cred.id}`, { ...cred });
+		console.log(cred);
+		axios.get(`/data?uname=${uname}`).then((result) => {
+			setCred(result.data[0]);
+		});
+	};
+
 	return (
-		<div className="flex flex-col content-center items-center justify-center mt-8 mb-20">
+		<div className="flex flex-col content-center items-center justify-center mt-8 mb-20 dark:text-white-900">
 			{cred.uname === "admin" ? (
 				<Admin />
 			) : (
@@ -54,14 +74,14 @@ const User = () => {
 							</h5>
 						</div>
 						<div>
-							<Link to={`/editor/0/${cred.id}`}>
+							<Link to={`/editor/0/${cred.id}/1`}>
 								<h1 className="mx-2 px-9 py-2 font-semibold text-base rounded-full shadow-sm bg-metal text-white-900 hover:drop-shadow-md hover:opacity-80 hover:cursor-pointer">
 									Create New
 								</h1>
 							</Link>
 						</div>
 						<img
-							className="rounded-[50%] w-[220px] drop-shadow-2xl pointer-events-none"
+							className="uploadedImage rounded-[50%] w-[220px] drop-shadow-2xl pointer-events-none"
 							src={cred.img}
 							alt=""
 						/>
@@ -71,9 +91,10 @@ const User = () => {
 					</h5>
 					<CrudTable
 						head={["ID", "Blog Title", "Date", "Edit", "Delete"]}
-						data={cred && cred.blogs.map((e) => [e.title, e.date])}
+						data={data}
 						filter={filter}
 						myPath={`/editor/1/${cred.id}`}
+						delete={deleteData}
 					/>
 				</>
 			)}
